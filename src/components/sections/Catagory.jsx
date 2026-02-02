@@ -11,7 +11,7 @@ const ShopCategories = () => {
     },
     {
       title: "RAZORS",
-      image: "https://media.istockphoto.com/id/1460983332/photo/blue-razor-and-handkerchief-on-white-basin.webp?a=1&b=1&s=612x612&w=0&k=20&c=Aa1Y6mJUic8dGCdWwdhunGEKv0Yc-MlrPgAYSvI1yPg=",
+      image: "https://res.cloudinary.com/dsilhases/image/upload/v1737304677/51HnBiLn2JL_1_whttik.jpg",
       alt: "Left handed scissors"
     },
     {
