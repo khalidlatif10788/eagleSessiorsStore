@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -12,9 +12,7 @@ export const placeOrderWithCod = createAsyncThunk(
     "place/order",
     async (data) => {
       try {
-        const response = await axios.post("/place/order/with/cod",data,{
-            withCredentials:true
-        });
+        const response = await api.post("/place/order/with/cod",data);
         return response.data;
       } catch (error) {
         console.log(error);

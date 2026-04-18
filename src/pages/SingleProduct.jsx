@@ -44,29 +44,34 @@ const ProductPage = () => {
   const [selectedVariant, setSelectedVariant] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [openSection, setOpenSection] = useState("description");
 
   const [skuId,setSkuId]=useState("")
-  useEffect(()=>{
-    setSkuId((selectedColor || "") + (selectedSize || "") + (selectedVariant || ""));
-    console.log(skuId);
-    
-  },[selectedColor,selectedSize,selectedVariant])
+  useEffect(() => {
+    const parts =
+      `${selectedColor || ""}${selectedSize || ""}${selectedVariant || ""}`.replace(
+        /\s+/g,
+        ""
+      );
+    if (parts) {
+      setSkuId(parts);
+    } else if (skus?.length && skus[0]?.skuId) {
+      setSkuId(skus[0].skuId);
+    } else {
+      setSkuId("");
+    }
+  }, [selectedColor, selectedSize, selectedVariant, skus]);
   
 
-  const [quantity, setQuantity] = useState(1);
-  const [openSection, setOpenSection] = useState('description');
 
+  useEffect(() => {
+    const key = (skuId || "").replace(/\s+/g, "");
+    if (!key || !id) return;
+    dispatch(getSingleSku(`productId=${id}&skuId=${key}`));
+  }, [skuId, id, dispatch]);
 
-
-
-
-  useEffect(()=>{
-    
-    dispatch(getSingleSku(`productId=${id}&skuId=${skuId.replace(/\s+/g, '')}`)).then((res)=>{
-      console.log(res);
-      
-    })
-  },[skuId])
+  const activeSku = sku || skus?.[0];
 
   // Get all available SKUs for thumbnail display
  
@@ -164,7 +169,7 @@ const ProductPage = () => {
   
       // Check if the product with the same productId and skuId already exists
       let existingIndex = order.findIndex(
-        (orderr) => orderr._id === sku?._id
+        (orderr) => orderr._id === activeSku?._id
       );
   
       if (existingIndex !== -1) {
@@ -173,7 +178,7 @@ const ProductPage = () => {
       } else {
         // If the product does not exist, add it to the cart
         order.push({
-          _id:sku?._id,
+          _id:activeSku?._id,
           quantity,
         });
       }
@@ -198,7 +203,7 @@ const ProductPage = () => {
   
       // Check if the product with the same productId and skuId already exists
       let existingIndex = order.findIndex(
-        (orderr) => orderr._id === sku?._id
+        (orderr) => orderr._id === activeSku?._id
       );
   
       if (existingIndex !== -1) {
@@ -207,7 +212,7 @@ const ProductPage = () => {
       } else {
         // If the product does not exist, add it to the cart
         order.push({
-          _id:sku?._id,
+          _id:activeSku?._id,
           quantity,
         });
       }
@@ -223,12 +228,12 @@ const ProductPage = () => {
   };
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  {isProductLoading||isLoading   ? (
+  {isProductLoading ? (
     <div className="sweet-loading  h-screen flex justify-center items-center">
       <MoonLoader
         color="#ff0000"
         cssOverride={{}}
-        loading={isLoading}
+        loading={isProductLoading}
         size={60}
         speedMultiplier={2}
       />
@@ -239,7 +244,11 @@ const ProductPage = () => {
         <div className="sticky top-4 space-y-4">
           <div className="w-full relative bg-gray-100 rounded-lg overflow-hidden">
             <img
-              src={sku?.image?.url||skus?.[0]?.image?.url}
+              src={
+                activeSku?.image?.url ||
+                skus?.[0]?.image?.url ||
+                product?.images?.[0]?.url
+              }
               alt="Product"
               className="w-full h-auto object-cover"
               style={{ maxHeight: '450px' }}
@@ -247,14 +256,12 @@ const ProductPage = () => {
           </div>
           <div className='flex gap-x-3 overflow-x-scroll'>
 
-            {skus?.map((sku)=>{
-              return(
-                <div key={sku?._id} onClick={()=>setSkuId(sku?.skuId)} className='border border-black'>
-        <img src={sku?.image?.url} className='h-20' alt="" />
+            {skus?.map((row) => (
+                <div key={row?._id} onClick={()=>setSkuId(row?.skuId)} className='border border-black'>
+        <img src={row?.image?.url} className='h-20' alt="" />
 
             </div>
-              )
-            })}
+              ))}
 
           </div>
         </div>
@@ -273,11 +280,11 @@ const ProductPage = () => {
           <h1 className="text-2xl font-bold mt-2 break-words">
             {product?.name}
           </h1>
-          <p className="text-xl mt-2">£ {sku?.priceAfterDiscount?.toLocaleString()}</p>
-          {sku?.price !== sku?.priceAfterDiscount ? (
-            <p className="text-lg mt-2 line-through">£ {sku?.price?.toLocaleString()}</p>
+          <p className="text-xl mt-2">£ {Number(activeSku?.priceAfterDiscount ?? 0).toLocaleString()}</p>
+          {Number(activeSku?.price ?? 0) !== Number(activeSku?.priceAfterDiscount ?? 0) ? (
+            <p className="text-lg mt-2 line-through">£ {Number(activeSku?.price ?? 0).toLocaleString()}</p>
           ) : null}
-          <p className="text-sm text-gray-600 mt-1">SKU: {skuId} | Stock: {sku?.stock}</p>
+          <p className="text-sm text-gray-600 mt-1">SKU: {activeSku?.skuId ?? skuId} | Stock: {activeSku?.stock ?? "—"}</p>
         </div>
 
         <div className="space-y-6">
@@ -336,10 +343,10 @@ const ProductPage = () => {
                 value={quantity}
                 onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
                 className="w-full text-center focus:outline-none"
-                max={sku?.stock}
+                max={activeSku?.stock}
               />
               <button
-                onClick={() => setQuantity(Math.min(sku?.stock || 1, quantity + 1))}
+                onClick={() => setQuantity(Math.min(activeSku?.stock || 1, quantity + 1))}
                 className="px-3 py-2 border-l hover:bg-gray-50"
               >
                 +
@@ -352,14 +359,14 @@ const ProductPage = () => {
           <button 
           onClick={addToCart}
             className="w-full py-3 px-4 border border-black bg-black text-white rounded-lg hover:bg-gray-900 transition-colors disabled:bg-gray-300 disabled:border-gray-300"
-            disabled={!sku?.stock}
+            disabled={!activeSku?.stock}
           >
             Add to Cart
           </button>
           <button 
           onClick={buyNowHandler}
             className="w-full py-3 px-4 border border-black rounded-lg hover:bg-gray-50 transition-colors disabled:border-gray-300 disabled:text-gray-300"
-            disabled={!sku?.stock}
+            disabled={!activeSku?.stock}
           >
             Buy Now
           </button>

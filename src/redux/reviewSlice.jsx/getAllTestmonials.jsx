@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -14,7 +14,7 @@ export const getAllTestimonials = createAsyncThunk(
     "get/all/testimonials",
     async () => {
       try {
-        const response = await axios.get("/get/all/testimonials");
+        const response = await api.get("/get/all/testimonials");
         return response.data;
       } catch (error) {
         console.log(error);

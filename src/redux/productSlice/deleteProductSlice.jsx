@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -11,9 +11,7 @@ export const deleteProductt = createAsyncThunk(
     "delete/product",
     async (id) => {
       try {
-        const response = await axios.delete(`/admin/product/${id}`,{
-            withCredentials:true
-        });
+        const response = await api.delete(`/admin/product/${id}`);
         return response.data;
       } catch (error) {
         console.log(error);

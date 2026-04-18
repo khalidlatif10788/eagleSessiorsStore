@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -12,12 +12,7 @@ export const changeLogo = createAsyncThunk(
     "change/logo",
     async (data) => {
       try {
-        const response = await axios.put("/change/logo",data,{
-            withCredentials:true,
-            headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-        });
+        const response = await api.put("/change/logo",data);
         return response.data;
       } catch (error) {
         console.log(error);

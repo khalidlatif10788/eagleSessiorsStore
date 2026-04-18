@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -12,7 +12,7 @@ export const sendEmailForMsg = createAsyncThunk(
     "send/email/message",
     async (data) => {
       try {
-        const response = await axios.post("/send/message",data);
+        const response = await api.post("/send/message",data);
         return response.data;
       } catch (error) {
         console.log(error);

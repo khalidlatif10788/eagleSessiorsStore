@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -12,12 +12,7 @@ export const addBannerAdmin = createAsyncThunk(
     "add/admin/banner",
     async (data) => {
       try {
-        const response = await axios.post("/add/a/banner",data,{
-            headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-              withCredentials:true,
-        });
+        const response = await api.post("/add/a/banner",data);
         return response.data;
       } catch (error) {
         console.log(error);
@@ -29,9 +24,7 @@ export const deleteBannerAdmin = createAsyncThunk(
     "delete/admin/banner",
     async (id) => {
       try {
-        const response = await axios.delete(`/delete/a/banner/${id}`,{
-              withCredentials:true,
-        });
+        const response = await api.delete(`/delete/a/banner/${id}`);
         return response.data;
       } catch (error) {
         console.log(error);

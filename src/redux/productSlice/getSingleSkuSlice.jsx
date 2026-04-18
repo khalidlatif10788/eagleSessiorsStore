@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
+import { getSingleProduct } from "./getsingleProductSlice";
 
 const initialState = {
   isLoading: false,
@@ -9,15 +10,12 @@ const initialState = {
 
 export const getSingleSku = createAsyncThunk(
     "get/single/sku",
-    async (id) => {
+    async (queryString, { rejectWithValue }) => {
       try {
-        console.log(id);
-        
-        const response = await axios.get(`/sku?${id}`);
+        const response = await api.get(`/sku?${queryString}`);
         return response.data;
       } catch (error) {
-        console.log(error);
-        
+        return rejectWithValue(error.response?.data || { message: error.message });
       }
     }
   );
@@ -32,14 +30,17 @@ export const getSingleSku = createAsyncThunk(
     },
     extraReducers: (builder) => {
       builder
+        .addCase(getSingleProduct.pending, (state) => {
+          state.sku = null;
+        })
         .addCase(getSingleSku.pending, (state) => {
           state.isLoading = true;
         })
         .addCase(getSingleSku.fulfilled, (state, action) => {
           state.isLoading = false;
-          state.sku = action.payload?.success?action.payload?.sku:null;
+          state.sku = action.payload?.success ? action.payload?.sku : null;
         })
-        .addCase(getSingleSku.rejected, (state, action) => {
+        .addCase(getSingleSku.rejected, (state) => {
           state.isLoading = false;
           state.sku = null;
         })

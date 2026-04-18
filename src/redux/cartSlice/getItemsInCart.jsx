@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -11,7 +11,7 @@ export const getAllSkusForCart = createAsyncThunk(
     "get/cart/skus",
     async (data) => {
       try {
-        const response = await axios.post("/get/cart/skus",data);
+        const response = await api.post("/get/cart/skus",data);
         return response.data;
       } catch (error) {
         console.log(error);

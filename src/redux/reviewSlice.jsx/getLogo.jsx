@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -11,7 +11,7 @@ export const getLogo = createAsyncThunk(
     "get/logo",
     async () => {
       try {
-        const response = await axios.get("/get/logo");
+        const response = await api.get("/get/logo");
         return response.data;
       } catch (error) {
         console.log(error);

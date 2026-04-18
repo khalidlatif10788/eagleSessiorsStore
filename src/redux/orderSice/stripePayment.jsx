@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -12,9 +12,7 @@ export const stripePaymentCard = createAsyncThunk(
     "pay/with/cart/stripe",
     async (data) => {
       try {
-        const response = await axios.post("/stripe/payment/card",data,{
-            withCredentials:true
-        });
+        const response = await api.post("/stripe/payment/card",data);
         return response.data;
       } catch (error) {
         console.log(error);

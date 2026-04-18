@@ -1,7 +1,7 @@
 
 
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -14,9 +14,7 @@ export const deleteReviewAdmin = createAsyncThunk(
     "get/all/reviews/admin",
     async (id) => {
       try {
-        const response = await axios.delete(`/delete/a/review/admin/${id}`,{
-            withCredentials:true
-        });
+        const response = await api.delete(`/delete/a/review/admin/${id}`);
         return response.data;
       } catch (error) {
         console.log(error);

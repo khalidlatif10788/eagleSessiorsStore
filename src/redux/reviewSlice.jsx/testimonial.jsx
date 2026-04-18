@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import toast from "react-hot-toast";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -11,12 +12,7 @@ export const addTestimonialAdmin = createAsyncThunk(
     "add/admin/testimonial",
     async (data) => {
       try {
-        const response = await axios.post("/add/a/testimonial",data,{
-            headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-              withCredentials:true,
-        });
+        const response = await api.post("/add/a/testimonial",data);
         return response.data;
       } catch (error) {
         console.log(error);
@@ -28,9 +24,7 @@ export const deleteTestimonialAdmin = createAsyncThunk(
     "delete/admin/testimonial",
     async (id) => {
       try {
-        const response = await axios.delete(`/delete/a/testimonial/${id}`,{
-              withCredentials:true,
-        });
+        const response = await api.delete(`/delete/a/testimonial/${id}`);
         return response.data;
       } catch (error) {
         console.log(error);

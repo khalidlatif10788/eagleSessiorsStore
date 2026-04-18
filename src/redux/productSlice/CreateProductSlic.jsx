@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -12,12 +12,7 @@ export const createProduct = createAsyncThunk(
     "create/product",
     async (formData, { rejectWithValue }) => {
       try {
-        const response = await axios.post("/admin/product/new", formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-            withCredentials:true,
-          });
+        const response = await api.post("/admin/product/new", formData);
         return response.data;
       } catch (error) {
         return toast.error(error.response.data.message)

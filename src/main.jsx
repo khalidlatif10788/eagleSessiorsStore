@@ -6,9 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
 
 import store from "./redux/store.js"
-import axios from 'axios'
-
-axios.defaults.baseURL =process.env.BASE_URL
+// API base URL: set `BASE_URL` or `VITE_API_URL` in `.env` (see BACKEND_SETUP.md).
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>

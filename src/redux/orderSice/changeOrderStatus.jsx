@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import toast from "react-hot-toast";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -11,9 +12,7 @@ export const changeOrderStatus = createAsyncThunk(
     "change/order/status",
     async (id) => {
       try {
-        const response = await axios.put("/change/order/status",{id},{
-            withCredentials:true
-        });
+        const response = await api.put("/change/order/status",{id});
         return response.data;
       } catch (error) {
         console.log(error);
@@ -25,9 +24,7 @@ export const cancleOrder = createAsyncThunk(
     "change/order/cancle",
     async (id) => {
       try {
-        const response = await axios.put("/cancle/order",{id},{
-            withCredentials:true
-        });
+        const response = await api.put("/cancle/order",{id});
         return response.data;
       } catch (error) {
         console.log(error);

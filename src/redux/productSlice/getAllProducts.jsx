@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -17,7 +17,7 @@ export const getAllProducts = createAsyncThunk(
           a.forEach((value,i)=>{str+=`${value}=${b[i]}&`})
           console.log(str);
           
-        const response = await axios.get(str);
+        const response = await api.get(str);
         return response.data;
       } catch (error) {
         console.log(error);

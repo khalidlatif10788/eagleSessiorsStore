@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import toast from "react-hot-toast";
+import api from "../../services/api";
 
 const initialState = {
   isAuthenticated: false,
@@ -7,23 +8,29 @@ const initialState = {
   user: null,
 };
 
-const config = {
-  headers: {
-    "Content-Type": "multipart/form-data",
-  },
-};
+function persistTokens(payload) {
+  if (payload?.access) {
+    localStorage.setItem("access", payload.access);
+    if (payload.refresh) {
+      localStorage.setItem("refresh", payload.refresh);
+    }
+  }
+}
+
+function clearTokens() {
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
+}
 
 export const registerUser = createAsyncThunk(
   "singup/user",
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/register", formData, {
-        withCredentials: true,
-      });
+      const response = await api.post("/register", formData);
       return response.data;
     } catch (error) {
-      toast.error(error.response?.data?.message)
-      rejectWithValue(error);
+      toast.error(error.response?.data?.message);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
@@ -32,57 +39,48 @@ export const loginUser = createAsyncThunk(
   "login/user",
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/login", formData, {
-        withCredentials: true,
-      });
+      const response = await api.post("/login", formData);
       return response.data;
     } catch (error) {
-       toast.error(error.response.data.message)
-      rejectWithValue(error);
+      toast.error(error.response?.data?.message);
+      return rejectWithValue(error.response?.data);
     }
   }
 );
+
 export const loginWithGoogle = createAsyncThunk(
   "login/with/google/user",
-  async (code,) => {
+  async (code) => {
     try {
-      const response = await axios.get(`/login/google?code=${code}`, {
-        withCredentials: true,
-      });
+      const response = await api.get(`/login/google?code=${code}`);
       return response.data;
     } catch (error) {
       console.log(error);
-      return toast.error(error.response.data.message)
+      toast.error(error.response?.data?.message);
+      throw error;
     }
   }
 );
-export const logoutUser = createAsyncThunk(
-  "logout/user",
-  async () => {
-    try {
-      const response = await axios.get("/logout", {
-        withCredentials: true,
-      });
-      return response.data;
-    } catch (error) {
-      console.log(error)
-    }
+
+export const logoutUser = createAsyncThunk("logout/user", async () => {
+  try {
+    const response = await api.get("/logout");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return {};
   }
-);
-export const checkAuth = createAsyncThunk(
-  "check/auth",
-  async () => {
-      const response = await axios.get("/check/auth", {
-        headers: {
-          "Cache-Control":
-          "no-store, no-cache, must-revalidate, proxy-revalidate",
-        },
-        withCredentials: true,
-      });
-      return response.data;
-    
-  }
-);
+});
+
+export const checkAuth = createAsyncThunk("check/auth", async () => {
+  const response = await api.get("/check/auth", {
+    headers: {
+      "Cache-Control":
+        "no-store, no-cache, must-revalidate, proxy-revalidate",
+    },
+  });
+  return response.data;
+});
 
 const authSlice = createSlice({
   name: "auth",
@@ -95,12 +93,12 @@ const authSlice = createSlice({
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(registerUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
@@ -109,11 +107,12 @@ const authSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        persistTokens(action.payload);
         state.isLoading = false;
-        state.user = action.payload?.success?action.payload?.user:null;
-        state.isAuthenticated =action.payload?.success?true:false;
+        state.user = action.payload?.success ? action.payload?.user : null;
+        state.isAuthenticated = action.payload?.success ? true : false;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(loginUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
@@ -122,11 +121,12 @@ const authSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(loginWithGoogle.fulfilled, (state, action) => {
+        persistTokens(action.payload);
         state.isLoading = false;
-        state.user = action.payload?.success?action.payload?.user:null;
-        state.isAuthenticated =action.payload?.success?true:false;
+        state.user = action.payload?.success ? action.payload?.user : null;
+        state.isAuthenticated = action.payload?.success ? true : false;
       })
-      .addCase(loginWithGoogle.rejected, (state, action) => {
+      .addCase(loginWithGoogle.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
@@ -136,10 +136,10 @@ const authSlice = createSlice({
       })
       .addCase(checkAuth.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.user = action.payload?.success?action.payload?.user:null;
-        state.isAuthenticated =action.payload?.success?true:false;
+        state.user = action.payload?.success ? action.payload?.user : null;
+        state.isAuthenticated = action.payload?.success ? true : false;
       })
-      .addCase(checkAuth.rejected, (state, action) => {
+      .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
@@ -147,16 +147,18 @@ const authSlice = createSlice({
       .addCase(logoutUser.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(logoutUser.fulfilled, (state, action) => {
+      .addCase(logoutUser.fulfilled, (state) => {
+        clearTokens();
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       })
-      .addCase(logoutUser.rejected, (state, action) => {
+      .addCase(logoutUser.rejected, (state) => {
+        clearTokens();
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
-      })
+      });
   },
 });
 

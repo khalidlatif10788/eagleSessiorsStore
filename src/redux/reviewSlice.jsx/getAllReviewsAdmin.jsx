@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import api from "../../services/api";
 
 const initialState = {
   isLoading: false,
@@ -11,9 +11,7 @@ export const getAllReviewsAdmin = createAsyncThunk(
     "get/all/reviews/admin",
     async () => {
       try {
-        const response = await axios.get("/get/all/reviews/admin",{
-            withCredentials:true
-        });
+        const response = await api.get("/get/all/reviews/admin");
         return response.data;
       } catch (error) {
         console.log(error);
